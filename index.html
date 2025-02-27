@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Questions</h1>
+    <div id="questions-container"></div>
+
+    <script>
+        async function fetchQuestions() {
+            try {
+                const response = await fetch('/questions');
+                const questions = await response.json();
+                displayQuestions(questions);
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        }
+
+        function displayQuestions(questions) {
+            const container = document.getElementById('questions-container');
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${question.question}</h3>
+                    <div class="options">
+                        <label>
+                            <input type="radio" name="question-${question.id}" value="A"> ${question.option_a}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="question-${question.id}" value="B"> ${question.option_b}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="question-${question.id}" value="C"> ${question.option_c}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="question-${question.id}" value="D"> ${question.option_d}
+                        </label><br>
+                    </div>
+                    <button onclick="checkAnswer('${question.id}', '${question.correct_answer}')">Submit Answer</button>
+                    <p id="result-${question.id}"></p>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function checkAnswer(questionId, correctAnswer) {
+            const selectedOption = document.querySelector(`input[name="question-${questionId}"]:checked`);
+            const resultElement = document.getElementById(`result-${questionId}`);
+
+            if (!selectedOption) {
+                resultElement.textContent = 'Please select an option.';
+                resultElement.className = 'incorrect';
+                return;
+            }
+
+            const userAnswer = selectedOption.value;
+            if (userAnswer === correctAnswer) {
+                resultElement.textContent = 'Correct!';
+                resultElement.className = 'correct';
+            } else {
+                resultElement.textContent = `Incorrect. The correct answer is ${correctAnswer}.`;
+                resultElement.className = 'incorrect';
+            }
+        }
+
+        fetchQuestions();
+    </script>
+</body>
+</html>
